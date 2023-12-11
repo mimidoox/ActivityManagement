@@ -11,6 +11,8 @@ dependencies:
   firebase_auth: ^4.15.0
   firebase_core: ^2.24.0
   google_fonts: ^2.1.0
+  tflite: ^1.0.6
+  http: ^0.13.3
 
 
   flutter:

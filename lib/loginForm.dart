@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mvp/main.dart';
 import 'package:mvp/profil.dart';
 import 'package:provider/provider.dart';
+import 'bottomNav.dart';
 import 'listeActivites.dart';
 import 'ajoutActivites.dart';
 import 'package:flutter/material.dart';
@@ -69,24 +71,28 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Accueil'),
+        title: const Text(
+          'Toutes les activités',
+          textAlign: TextAlign.justify,
+        ),
+        automaticallyImplyLeading: false,
+        actions: [
+          ElevatedButton.icon(
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => MainApp()),
+              );
+            },
+            icon: Icon(Icons.logout_rounded),
+            label: Text("Se déconnecter"),
+          )
+        ],
       ),
       body: ListeActivites(),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_activity),
-            label: 'Activités',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Ajout',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentIndex: 0,
         onTap: (value) => {
           if (value == 1)
             {

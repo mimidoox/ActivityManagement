@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:mvp/ajoutActivites.dart';
+import 'package:mvp/bottomNav.dart';
+import 'package:mvp/main.dart';
 
 import 'loginForm.dart';
 
@@ -21,6 +23,7 @@ class _UserProfileState extends State<UserProfile> {
   late TextEditingController _villeController;
   late TextEditingController _telephoneController;
   late TextEditingController _imageUrlController;
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -38,35 +41,74 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   void _loadUserData() async {
-    // Récupérer les données de l'utilisateur depuis Firestore
-    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-        .collection('utilisateurs')
-        .doc(widget.userId)
-        .get();
+    try {
+      // Récupérer les données de l'utilisateur depuis Firestore
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('utilisateurs')
+          .doc(widget.userId)
+          .get();
 
-    // Mettre à jour les contrôleurs avec les données récupérées
-    Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
-    _nomController.text = userData['nom'];
-    _prenomController.text = userData['prenom'];
+      // Vérifier si le document existe
+      if (!userSnapshot.exists) {
+        print('User document does not exist for ID: ${widget.userId}');
 
-    // Format the date and set it to the controller
-    Timestamp timestamp = userData['dateNaissance'];
-    DateTime dateNaissance = timestamp.toDate();
-    _dateNaissanceController.text =
-        DateFormat('dd/MM/yyyy').format(dateNaissance);
+        // Create a new document for the user with empty fields
+        await FirebaseFirestore.instance
+            .collection('utilisateurs')
+            .doc(widget.userId)
+            .set({
+          'nom': '',
+          'prenom': '',
+          'dateNaissance': // You can set this to a default date if needed
+              Timestamp.fromDate(DateTime.now()),
+          'pays': '',
+          'ville': '',
+          'telephone': '',
+          'photo': '',
+        });
 
-    _paysController.text = userData['pays'];
-    _villeController.text = userData['ville'];
-    _telephoneController.text = userData['telephone'];
-    _imageUrlController.text = userData['photo'];
+        print('New user document created for ID: ${widget.userId}');
+      } else {
+        // Mettre à jour les contrôleurs avec les données récupérées
+        Map<String, dynamic> userData =
+            userSnapshot.data() as Map<String, dynamic>;
+
+        _nomController.text = userData['nom'];
+        _prenomController.text = userData['prenom'];
+
+        // Format the date and set it to the controller
+        Timestamp timestamp = userData['dateNaissance'];
+        DateTime dateNaissance = timestamp.toDate();
+        _dateNaissanceController.text =
+            DateFormat('dd/MM/yyyy').format(dateNaissance);
+
+        _paysController.text = userData['pays'];
+        _villeController.text = userData['ville'];
+        _telephoneController.text = userData['telephone'];
+        _imageUrlController.text = userData['photo'];
+      }
+    } catch (error) {
+      print('Error loading user data: $error');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     String userId = widget.userId;
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('Mon Profil'),
+        title: Text(
+          'Mon Profil',
+          textAlign: TextAlign.justify,
+        ),
+        automaticallyImplyLeading: false,
+        actions: [
+          ElevatedButton(
+            onPressed: _updateUserData,
+            child: Text('Valider'),
+          )
+        ],
         backgroundColor: Colors.blue, // Change app bar color
       ),
       body: Padding(
@@ -88,33 +130,34 @@ class _UserProfileState extends State<UserProfile> {
             SizedBox(height: 16.0), // Add spacing here
             _buildTextField(_telephoneController, 'Téléphone'),
             SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                _updateUserData();
-              },
-              child: Text('Mettre à jour'),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.green, // Change button color
-              ),
+            Row(
+              mainAxisAlignment:
+                  MainAxisAlignment.spaceEvenly, // Adjust as needed
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    // Sign out the user
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => MainApp()),
+                      (Route<dynamic> route) => false,
+                    );
+                  },
+                  icon: Icon(Icons.logout_rounded),
+                  label: Text("Se déconnecter"),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.red, // Change button color
+                    fixedSize: Size(180, 40), // Set fixed size
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_activity),
-            label: 'Activités',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Ajout',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentIndex: 2,
         onTap: (index) {
           if (index == 0) {
             // Naviguer vers la page de la liste d'activités
@@ -127,12 +170,8 @@ class _UserProfileState extends State<UserProfile> {
             );
           } else if (index == 1) {
             // Naviguer vers la page d'ajout d'activité (pour le profil dans cet exemple)
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => AddActivityForm()
-                      )
-            );
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => AddActivityForm()));
           }
         },
       ),
@@ -145,7 +184,14 @@ class _UserProfileState extends State<UserProfile> {
     return photoUrl.isNotEmpty
         ? CircleAvatar(
             radius: 75.0,
-            backgroundImage: NetworkImage(photoUrl),
+            child: ClipOval(
+              child: Image.network(
+                photoUrl,
+                width: 150.0,
+                height: 150.0,
+                fit: BoxFit.cover, // Use BoxFit.cover to avoid zooming
+              ),
+            ),
           )
         : FutureBuilder<DocumentSnapshot>(
             future: FirebaseFirestore.instance
@@ -171,7 +217,15 @@ class _UserProfileState extends State<UserProfile> {
                 return photoUrlFromFirestore.isNotEmpty
                     ? CircleAvatar(
                         radius: 75.0,
-                        backgroundImage: NetworkImage(photoUrlFromFirestore),
+                        child: ClipOval(
+                          child: Image.network(
+                            photoUrlFromFirestore,
+                            width: 150.0,
+                            height: 150.0,
+                            fit: BoxFit
+                                .cover, // Use BoxFit.cover to avoid zooming
+                          ),
+                        ),
                       )
                     : CircleAvatar(
                         radius: 75.0,

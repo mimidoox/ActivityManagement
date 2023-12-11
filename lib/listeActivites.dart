@@ -6,9 +6,6 @@ class ListeActivites extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Liste des Activités'),
-      ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection('activites').snapshots(),
         builder: (context, snapshot) {
@@ -32,25 +29,29 @@ class ListeActivites extends StatelessWidget {
                 child: Card(
                   elevation: 3,
                   margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Afficher l'image de l'activité à partir de l'URL
                       Image.network(
                         activite['image'],
-                        width: double.infinity,
-                        height: 200,
-                        fit: BoxFit.values[1],
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.cover,
                       ),
-                      ListTile(
-                        contentPadding: EdgeInsets.all(16),
-                        title: Text(activite['titre']),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 8),
-                            Text('${activite['prix']}€ - ${activite['lieu']}'),
-                          ],
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: ListTile(
+                          contentPadding: EdgeInsets.all(16),
+                          title: Text(activite['titre']),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 8),
+                              Text(
+                                  '${activite['prix']}€ - ${activite['lieu']}'),
+                            ],
+                          ),
                         ),
                       ),
                     ],

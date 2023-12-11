@@ -22,7 +22,8 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('MVP'),
+        title: const Text('Activity Management'),
+        automaticallyImplyLeading: false,
       ),
       body: Center(
         child: Padding(
@@ -49,6 +50,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: LoginPage(),
     );
   }
