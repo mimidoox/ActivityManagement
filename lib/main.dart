@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mvp/firebase_options.dart';
 
 import 'loginForm.dart';
@@ -22,13 +23,26 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Activity Management'),
+        backgroundColor: Color.fromRGBO(116, 179, 201, 1.000),
+        title: Text('Activity Management',
+            style: GoogleFonts.satisfy(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            )),
         automaticallyImplyLeading: false,
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: LoginForm(),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/background.png"),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: LoginForm(),
+          ),
         ),
       ),
     );

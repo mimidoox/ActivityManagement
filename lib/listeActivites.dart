@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ListeActivites extends StatefulWidget {
   @override
@@ -12,14 +13,22 @@ class _ListeActivitesState extends State<ListeActivites> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildCategoriesList(),
-          Expanded(
-            child: _buildActivitiesList(selectedCategory),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/background.png"),
+            fit: BoxFit.cover,
           ),
-        ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildCategoriesList(),
+            Expanded(
+              child: _buildActivitiesList(selectedCategory),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -63,9 +72,13 @@ class _ListeActivitesState extends State<ListeActivites> {
           });
         },
         child: Chip(
-          label: Text(category),
+          label: Text(category,
+              style: GoogleFonts.satisfy(
+                fontSize: 14,
+                //fontWeight: FontWeight.bold,
+              )),
           backgroundColor: selectedCategory == category
-              ? Colors.blue
+              ? Color.fromARGB(255, 94, 152, 199)
               : Theme.of(context).chipTheme.backgroundColor,
         ),
       ),
@@ -116,12 +129,19 @@ class _ListeActivitesState extends State<ListeActivites> {
                     Expanded(
                       child: ListTile(
                         contentPadding: EdgeInsets.all(16),
-                        title: Text(activite['titre']),
+                        title: Text(
+                          activite['titre'],
+                          style: GoogleFonts.sevillana(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(height: 8),
-                            Text('${activite['prix']}€ - ${activite['lieu']}'),
+                            Text('${activite['prix']}€ - ${activite['lieu']}',
+                                style: GoogleFonts.singleDay(fontSize: 16)),
                           ],
                         ),
                       ),
@@ -141,7 +161,12 @@ class _ListeActivitesState extends State<ListeActivites> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Détails de l\'activité'),
+          backgroundColor: Color.fromRGBO(116, 179, 201, 1.000),
+          title: Text('Détails de l\'activité',
+              style: GoogleFonts.satisfy(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              )),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -151,18 +176,30 @@ class _ListeActivitesState extends State<ListeActivites> {
                 width: 200,
                 height: 200,
                 fit: BoxFit.cover,
+                alignment: Alignment.center,
               ),
               SizedBox(height: 16),
-              Text('${activite['titre']}'),
+              Text('${activite['titre']}',
+                  style: GoogleFonts.sevillana(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  )),
               SizedBox(height: 8),
-              Text('aura lieu à ${activite['lieu']}'),
+              Text('aura lieu à ${activite['lieu']}',
+                  style: GoogleFonts.singleDay(fontSize: 16)),
               SizedBox(height: 8),
-              Text('- ${activite['categorie']}'),
+              Text('- ${activite['categorie']}',
+                  style: GoogleFonts.singleDay(fontSize: 16)),
               SizedBox(height: 8),
               Text(
-                  '- le nombre minimal des personnes est ${activite['nbrMin']}'),
+                '- le nombre min des personnes est ${activite['nbrMin']}',
+                style: GoogleFonts.singleDay(fontSize: 16),
+              ),
               SizedBox(height: 8),
-              Text('- le prix du ticket est ${activite['prix']}€ par heure'),
+              Text(
+                '- le prix du ticket est ${activite['prix']}€ par heure',
+                style: GoogleFonts.singleDay(fontSize: 16),
+              ),
             ],
           ),
         );

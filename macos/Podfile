@@ -31,6 +31,16 @@ target 'Runner' do
   use_modular_headers!
 
   flutter_install_all_macos_pods File.dirname(File.realpath(__FILE__))
+
+  # Override deployment targets for individual pods
+  pod 'nanopb', '~> 2.4'
+  pod 'gRPC-C++', '~> 1.38'
+  pod 'abseil', '~>  1.20220623.0'
+  pod 'PromisesObjC', '~> 2.3.1'
+  pod 'GoogleUtilities', '~> 7.2'
+  pod 'GTMSessionFetcher', '~> 3.2.0'
+  pod 'BoringSSL-GRPC', '~> 0.0.7'
+  # Add more pods and their deployment targets as needed
 end
 
 post_install do |installer|
